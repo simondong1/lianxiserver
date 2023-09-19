@@ -1,0 +1,4 @@
+理想型和对方的自我介绍 用llm进行 similarity 对比 and vise versa
+通过similarity排序
+
+conda activate djserver
