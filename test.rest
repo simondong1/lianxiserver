@@ -1,20 +1,32 @@
 POST http://localhost:8000/signup
 Content-Type: application/json
-#username is number?
+#username is phone number?
 
-{"username": "1234", "password": "123"}
+{"username": "dong", "password": "123"}
 
 ###
 
 POST http://localhost:8000/login
 Content-Type: application/json
-#username is number?
 
-{"username": "1234", "password": "123"}
+{"username": "dong", "password": "123"}
 
 ###
 GET http://localhost:8000/test
 Content-Type: application/json
-Authorization: token acd3da7a210d8ce572eaef89ea07b96e228db0fe
+Authorization: token 99f729f98ead713c085b39283b47fc7aff8d5d01
 
 {}
+
+###
+POST http://localhost:8000/create_profile
+Content-Type: application/json
+Authorization: token 99f729f98ead713c085b39283b47fc7aff8d5d01
+
+{
+"name": "simon", "gender": "M", "seeking_gender": "F", 
+"self_introduction" : "25 years old, rich, loves travel",
+"partner_expectation": "young, energetic, good looking, went to good college",
+"location_longitude": 39.9042,
+"location_latitude": 116.4074
+}

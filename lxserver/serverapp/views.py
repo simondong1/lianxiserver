@@ -4,41 +4,22 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import os
-
-@csrf_exempt
-def upload_image(request):
-    if request.method == 'POST' and request.FILES.get('image'):
-        image = request.FILES['image']
-        image_name = image.name
-        with open(os.path.join('media', image_name), 'wb+') as destination:
-            for chunk in image.chunks():
-                destination.write(chunk)
-        return JsonResponse({'message': 'Image uploaded successfully.'})
-    return JsonResponse({'error': 'Invalid request.'})
-
-def get_image(request, usrname):
-    #need to fix so run llm and find list of images with labels
-    #  
-    try:
-        with open(os.path.join('media', usrname), 'rb') as image_file:
-            response = HttpResponse(image_file.read(), content_type='image/jpeg')
-            response['Content-Disposition'] = f'inline; filename="{usrname}"'
-            return response
-    except FileNotFoundError:
-        return JsonResponse({'error': 'Image not found.'})
-
-
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework import status
 from django.contrib.auth.models import User
-from .serializers import UserSerializer
+from .models import User_profile
+from .serializers import User_Serializer, User_profile_Serializer
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+
 
 @api_view(['POST'])
 def signup(request):
-    serializer = UserSerializer(data=request.data)
+    serializer = User_Serializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         #username is number?
@@ -55,15 +36,23 @@ def login(request):
     if not user.check_password(request.data['password']):
         return Response({"detail":"not found"}, status=status.HTTP_404_NOT_FOUND)
     token, created = Token.objects.get_or_create(user=user)
-    serializer = UserSerializer(user)
+    serializer = User_Serializer(user)
     return Response({'token': token.key, 'user': serializer.data})
-
-from rest_framework.decorators import authentication_classes, permission_classes
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def test_token(request):
     return Response("got {}".format(request.user.password))
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+#client upload profile data, save in database
+def create_profile(request):
+    serializer = User_profile_Serializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    print(request.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
