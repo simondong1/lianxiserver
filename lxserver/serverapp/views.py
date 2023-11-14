@@ -36,6 +36,7 @@ def login(request):
     if not user.check_password(request.data['password']):
         return Response({"detail":"not found"}, status=status.HTTP_404_NOT_FOUND)
     token, created = Token.objects.get_or_create(user=user)
+
     serializer = User_Serializer(user)
     return Response({'token': token.key, 'user': serializer.data})
 
@@ -56,3 +57,29 @@ def create_profile(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     print(request.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#update profile function for updating preferences
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+@permission_classes([IsAuthenticated])
+#provide recommendation based on user location
+def get_recommendations(request):
+    location = request.GET.get('location')
+    if location is not None:
+        try:
+            location = int(location)
+        except:
+            return Response({"error": "Invalid location parameter. It should be an integer."}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            #call database, get query set
+            results = User_profile.objects.filter(location_bucket=location)
+
+            #ranking logic (person to person matrix)
+
+            #serialize query set to json
+            serializer = User_profile_Serializer(results, many=True)
+
+            return Response(serializer.data)
+    else:
+        return Response({"error": "No location parameter provided in the URL."},status=status.HTTP_400_BAD_REQUEST)

@@ -12,7 +12,7 @@ class User_profile_Serializer(serializers.ModelSerializer):
     class Meta(object):
         model = User_profile
         fields = ['name','gender', 'seeking_gender','self_introduction',
-                  'partner_expectation','location_longitude','location_latitude',
+                  'partner_expectation','image_url','location_longitude','location_latitude',
                   ]
 
     def create(self,validated_data):

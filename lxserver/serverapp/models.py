@@ -16,6 +16,8 @@ class User_profile(models.Model):
 
     partner_expectation = models.CharField(max_length=200)
 
+    image_url = models.CharField(max_length=200, default='')
+
     location_longitude = models.DecimalField(max_digits=9,decimal_places=6)
     location_latitude = models.DecimalField(max_digits=9,decimal_places=6)
     location_bucket = models.PositiveIntegerField()
